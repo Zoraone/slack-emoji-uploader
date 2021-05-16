@@ -1,5 +1,7 @@
 # Slack Emoji Uploader
 
+[![Build Status](https://github.com/Zoraone/slack-emoji-uploader/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/Zoraone/slack-emoji-uploader/actions/workflows/ci.yml)
+
 Simple app to upload emojis into a slack space. Made as a personal project to transfer emojis from one workspace to another.
 
 ## Configuration
