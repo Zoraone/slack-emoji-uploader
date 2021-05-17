@@ -1,49 +1,45 @@
 package main
 
 import (
-	"fmt"
-	"log"
-	"os"
+	"bytes"
+	"io/ioutil"
+	"net/http"
 	"testing"
-
-	"github.com/joho/godotenv"
 )
 
-type Env struct {
-	Space string
-	Token string
+/*
+ * Mock client for tests
+ * Creates a custom version of the Do request which is called
+ * instead of the standard http one, allowing for a custom
+ * response.
+ */
+type MockDoFunc func(req *http.Request) (*http.Response, error)
+type MockClient struct {
+	MockDo MockDoFunc
 }
 
-func (e *Env) isMissingConfig() bool {
-	if e.Space == "" && e.Token == "" {
-		return true
-	}
-	return false
-}
-
-func loadEnvVariables() (Env, error) {
-	err := godotenv.Load(".env")
-	if err != nil {
-		log.Println(".env file not found, using set environment variables.")
-	}
-
-	e := Env{
-		Space: os.Getenv("SLACK_SPACE"),
-		Token: os.Getenv("SLACK_TOKEN"),
-	}
-
-	if e.isMissingConfig() {
-		return Env{}, fmt.Errorf("Missing environment variables, make sure they have been set correctly!")
-	}
-	return e, nil
+func (m *MockClient) Do(req *http.Request) (*http.Response, error) {
+	return m.MockDo(req)
 }
 
 func TestGetEmojiList(t *testing.T) {
-	env, err := loadEnvVariables()
-	if err != nil {
-		t.Error(err)
+	es := newEmojiService("test_space", "test_token")
+	jsonResponse := `{
+		"ok": true,
+		"emoji": {
+			"bowtie": "https://emoji.slack-edge.com/T02G0V63S/bowtie/f3ec6f2bb0.png"
+		}	
+	}`
+	r := ioutil.NopCloser(bytes.NewReader([]byte(jsonResponse)))
+
+	Client = &MockClient{
+		MockDo: func(*http.Request) (*http.Response, error) {
+			return &http.Response{
+				StatusCode: 200,
+				Body:       r,
+			}, nil
+		},
 	}
-	es := newEmojiService(env.Space, env.Token)
 
 	resp, err := es.getEmojiList()
 	if err != nil {
@@ -56,11 +52,15 @@ func TestGetEmojiList(t *testing.T) {
 }
 
 func TestUploadEmoji(t *testing.T) {
-	env, err := loadEnvVariables()
-	if err != nil {
-		t.Error(err)
+	es := newEmojiService("test_space", "test_token")
+	Client = &MockClient{
+		MockDo: func(*http.Request) (*http.Response, error) {
+			return &http.Response{
+				StatusCode: 200,
+				Body:       ioutil.NopCloser(bytes.NewReader([]byte(`{"ok":true}`))),
+			}, nil
+		},
 	}
-	es := newEmojiService(env.Space, env.Token)
 
 	emoji := Emoji{
 		Name: "feelsbadman",
@@ -68,18 +68,7 @@ func TestUploadEmoji(t *testing.T) {
 		URL:  "https://emoji.slack-edge.com/T02G0V63S/feelsbadman/06040f4acb5c61d4.png",
 	}
 
-	imageData, err := downloadFile(emoji.URL)
-	if err != nil {
-		t.Error(err)
-	}
-
-	err = es.uploadEmoji(emoji, imageData)
-	if err != nil {
-		t.Error(err)
-	}
-
-	// Cleanup
-	err = es.removeEmoji(emoji.Name)
+	err := es.uploadEmoji(emoji, []byte("this is image"))
 	if err != nil {
 		t.Error(err)
 	}

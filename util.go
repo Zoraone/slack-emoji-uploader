@@ -9,6 +9,25 @@ import (
 	"strings"
 )
 
+/*
+ * Wrapper around client to make testing easier
+ * by mocking an http client making calls to a
+ * server elsewhere
+ */
+type HTTPClient interface {
+	Do(req *http.Request) (*http.Response, error)
+}
+
+var (
+	Client HTTPClient
+)
+
+// Default implementation allows the app to use the standard
+// http client
+func initClient() {
+	Client = &http.Client{}
+}
+
 func buildDiffList(newList, existingList map[string]interface{}) []Emoji {
 	var emojiList []Emoji
 

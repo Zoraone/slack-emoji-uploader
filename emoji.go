@@ -71,7 +71,7 @@ func (es *EmojiService) getEmojiList() (map[string]interface{}, error) {
 	req.URL.RawQuery = q.Encode()
 	req.Header.Set("Content-Type", w.FormDataContentType())
 
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := Client.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -165,7 +165,7 @@ func (es *EmojiService) upload(name string, w *multipart.Writer, buf bytes.Buffe
 	req.SetBasicAuth("api", es.Token)
 	req.Header.Set("Content-Type", w.FormDataContentType())
 
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := Client.Do(req)
 	if err != nil {
 		return false, err
 	}
@@ -205,6 +205,8 @@ func (es *EmojiService) upload(name string, w *multipart.Writer, buf bytes.Buffe
 	return false, nil
 }
 
+// Currently unused - could be used for future functionality
+// Keeping here to retain parameters
 func (es *EmojiService) removeEmoji(name string) error {
 	buf := new(bytes.Buffer)
 	w := multipart.NewWriter(buf)
@@ -230,7 +232,7 @@ func (es *EmojiService) removeEmoji(name string) error {
 	req.SetBasicAuth("api", es.Token)
 	req.Header.Set("Content-Type", w.FormDataContentType())
 
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := Client.Do(req)
 	if err != nil {
 		return err
 	}
