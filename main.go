@@ -37,6 +37,7 @@ func main() {
 		log.Printf("received %s\n", s)
 	})
 
+	initClient()
 	var es *EmojiService
 	w.OnMessage(func(m *astilectron.EventMessage) interface{} {
 		var iEvent InboundEvent

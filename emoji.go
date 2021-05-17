@@ -14,17 +14,19 @@ import (
 )
 
 type EmojiService struct {
-	UrlEmojiList string
-	UrlEmojiAdd  string
+	UrlEmojiList   string
+	UrlEmojiAdd    string
+	UrlEmojiRemove string
 
 	Token string
 }
 
 func newEmojiService(space, token string) *EmojiService {
 	return &EmojiService{
-		UrlEmojiList: fmt.Sprintf("https://%s.slack.com/api/emoji.list", space),
-		UrlEmojiAdd:  fmt.Sprintf("https://%s.slack.com/api/emoji.add", space),
-		Token:        token,
+		UrlEmojiList:   fmt.Sprintf("https://%s.slack.com/api/emoji.list", space),
+		UrlEmojiAdd:    fmt.Sprintf("https://%s.slack.com/api/emoji.add", space),
+		UrlEmojiRemove: fmt.Sprintf("https://%s.slack.com/api/emoji.remove", space),
+		Token:          token,
 	}
 }
 
@@ -69,7 +71,7 @@ func (es *EmojiService) getEmojiList() (map[string]interface{}, error) {
 	req.URL.RawQuery = q.Encode()
 	req.Header.Set("Content-Type", w.FormDataContentType())
 
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := Client.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -163,7 +165,7 @@ func (es *EmojiService) upload(name string, w *multipart.Writer, buf bytes.Buffe
 	req.SetBasicAuth("api", es.Token)
 	req.Header.Set("Content-Type", w.FormDataContentType())
 
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := Client.Do(req)
 	if err != nil {
 		return false, err
 	}
@@ -201,4 +203,47 @@ func (es *EmojiService) upload(name string, w *multipart.Writer, buf bytes.Buffe
 
 	fmt.Printf("Success uploading %s\n", name)
 	return false, nil
+}
+
+// Currently unused - could be used for future functionality
+// Keeping here to retain parameters
+func (es *EmojiService) removeEmoji(name string) error {
+	buf := new(bytes.Buffer)
+	w := multipart.NewWriter(buf)
+
+	nameWriter, err := w.CreateFormField("name")
+	if err != nil {
+		return err
+	}
+	nameWriter.Write([]byte(name))
+	tokenWriter, err := w.CreateFormField("token")
+	if err != nil {
+		return err
+	}
+	tokenWriter.Write([]byte(es.Token))
+
+	w.Close()
+
+	req, err := http.NewRequest("POST", es.UrlEmojiRemove, buf)
+	if err != nil {
+		return err
+	}
+
+	req.SetBasicAuth("api", es.Token)
+	req.Header.Set("Content-Type", w.FormDataContentType())
+
+	resp, err := Client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	switch resp.StatusCode {
+	case 200:
+		break
+	default:
+		return fmt.Errorf("Unexpected status code: %v for %s", resp.StatusCode, name)
+	}
+
+	return nil
 }
