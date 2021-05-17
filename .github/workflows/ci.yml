@@ -11,10 +11,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - env:
-        SLACK_SPACE: ${{ secrets.SLACK_SPACE }}
-        SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
-
     - uses: actions/checkout@v2
 
     - name: Set up Go
@@ -26,4 +22,7 @@ jobs:
       run: go build -v ./...
 
     - name: Test
+      env:
+        SLACK_SPACE: ${{ secrets.SLACK_SPACE }}
+        SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
       run: go test -v ./...
