@@ -34,9 +34,25 @@
         <button @click="getEmojiList()" class="black-text btn">Get Emoji List</button>
     </div>
 
+    <br />
+
+    <div id="upload-all-modal" class="modal">
+        <div class="modal-content">
+            <h4>Warning</h4>
+            <p>Slack will throttle uploads past a certain threshold of emojis that get uploaded. Once that threshold has
+                been met, emojis from the list may not reliably be uploaded to the slack workspace.</p>
+        </div>
+        <div class="modal-footer">
+            <a href="#!" class="modal-close btn-flat">Cancel</a>
+            <button class="modal-close btn" onclick="emojiList.uploadAll()">Upload Anyways</button>
+        </div>
+    </div>
 
     <div id="emoji-list">
-        <div class="container">
+        <div class="container" v-if="emojis.length !== 0">
+            <div>
+                <a class="waves-effect waves-light btn modal-trigger" href="#upload-all-modal">Upload All</a>
+            </div>
             <div>
                 <input type="text" v-model="searchText" placeholder="Search...">
             </div>

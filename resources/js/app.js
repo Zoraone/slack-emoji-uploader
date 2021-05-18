@@ -57,6 +57,11 @@ const configApp = new Vue({
     }
 });
 
+document.addEventListener('DOMContentLoaded', function () {
+    let elems = document.querySelectorAll('.modal');
+    M.Modal.init(elems, '');
+});
+
 const emojiList = new Vue({
     el: '#emoji-list',
     data: {
@@ -87,6 +92,11 @@ const emojiList = new Vue({
                 }
                 this.$forceUpdate();
             });
+        },
+        uploadAll() {
+            for (const emoji of this.emojis) {
+                this.upload(emoji);
+            }
         }
     }
 });
