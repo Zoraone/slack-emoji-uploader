@@ -43,7 +43,12 @@
             <ul>
                 <li v-for="emoji in filteredList">
                     <div class="row">
-                        <div class="col s3"><img :src="emoji.url" width="32" height="32" /></div>
+                        <div v-if="emoji.type === 'alias'">
+                            <div class="col s3">Alias of {{ emoji.url }}</div>
+                        </div>
+                        <div v-else>
+                            <div class="col s3"><img class="materialboxed" :src="emoji.url" width="32" height="32" /></div>
+                        </div>
                         <div class="col s3">{{ emoji.name }}</div>
                         <div class="col s3"><button @click="upload(emoji)" class="btn">Upload</button></div>
                         <div class="col s3">

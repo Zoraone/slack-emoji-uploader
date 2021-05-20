@@ -34,7 +34,7 @@ func buildDiffList(newList, existingList map[string]interface{}) []Emoji {
 	for k, v := range newList {
 		if existingList[k] == nil {
 			UrlString := fmt.Sprintf("%v", v)
-			subs := strings.Split(UrlString, "%v")
+			subs := strings.Split(UrlString, ":")
 			if subs[0] == "alias" {
 				emojiList = append(emojiList, Emoji{
 					Name: k,

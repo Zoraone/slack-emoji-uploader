@@ -63,6 +63,10 @@ const emojiList = new Vue({
         emojis: [],
         searchText: ''
     },
+    updated: function() {
+        let elems = document.querySelectorAll('.materialboxed');
+        M.Materialbox.init(elems, '');
+    },
     computed: {
         filteredList() {
             return this.emojis.filter(emoji => {

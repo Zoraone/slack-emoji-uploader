@@ -63,16 +63,17 @@ func main() {
 			var eventBody InboundEmojiUploadEvent
 			json.Unmarshal(jsonBody, &eventBody)
 
-			imageData, err := downloadFile(eventBody.Emoji.URL)
-			if err != nil {
-				log.Println(err.Error())
-				return err.Error()
-			}
-
+			var err error
 			splitStr := strings.Split(eventBody.Emoji.URL, ":")
 			if splitStr[0] == "alias" {
 				err = es.uploadAlias(eventBody.Emoji.Name, splitStr[1])
 			} else {
+				imageData, err := downloadFile(eventBody.Emoji.URL)
+				if err != nil {
+					log.Println(err.Error())
+					return err.Error()
+				}
+
 				err = es.uploadEmoji(eventBody.Emoji, imageData)
 			}
 
